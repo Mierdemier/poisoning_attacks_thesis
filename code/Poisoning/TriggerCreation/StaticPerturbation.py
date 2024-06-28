@@ -14,7 +14,7 @@ class StaticPerturbation(TriggerCreationMethod):
         
         i = random.randint(0, self.region_size - 1)
         j = random.randint(0, self.region_size - 1)
-        region = np.zeros((self.region_size, self.region_size, 3)) if dataset.isColour else np.zeros((self.region_size, self.region_size))
+        region = np.zeros((self.region_size, self.region_size, 3 if dataset.isColour else 1))
         region[i, j] = self.perturbation_strength
         
         self.perturbation = np.tile(region, (img_size // self.region_size + 1, img_size // self.region_size + 1, 1))[:img_size, :img_size]

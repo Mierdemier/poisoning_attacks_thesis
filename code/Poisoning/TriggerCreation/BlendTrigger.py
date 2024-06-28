@@ -2,6 +2,7 @@ from Poisoning.TriggerCreation.TriggerCreationMethod import TriggerCreationMetho
 
 import numpy as np
 from PIL import Image
+import tensorflow as tf
 
 class BlendTrigger(TriggerCreationMethod):
     #Image given should match the dataset images in shape.
@@ -19,6 +20,7 @@ class BlendTrigger(TriggerCreationMethod):
     def Fit(self, architecture, dataset, target_label):
         if not dataset.isColour:
             self.trigger = self.trigger.mean(axis=2)
+            self.trigger = tf.expand_dims(self.trigger, axis=2).numpy()
         if dataset.ImgShape() != self.trigger.shape:
             raise ValueError(f"The trigger image must match the shape of the dataset images. {self.trigger.shape} != {dataset.ImgShape()}")
 

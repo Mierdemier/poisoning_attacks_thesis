@@ -1,5 +1,6 @@
 import numpy as np
 import tensorflow as tf
+import matplotlib.pyplot as plt
 
 from Poisoning.TriggerCreation.TriggerCreationMethod import TriggerCreationMethod
 
@@ -87,8 +88,6 @@ class DynamicPerturbation(TriggerCreationMethod):
                 self.perturbations[source_class] = self.Normalise(self.perturbations[source_class] + change)
                 n_fooled += fooled
                 n_images += 1
-
-            #For testing purposes: show how many times you fooled the network.
             print(f"Fooled {n_fooled / n_images} fraction of images.")
 
 
