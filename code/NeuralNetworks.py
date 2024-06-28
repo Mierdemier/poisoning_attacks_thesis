@@ -6,7 +6,7 @@ import numpy as np
 #Defines a plan for creating and training a neural network.
 #This will help us to keep track of surrogate networks, etc.
 class Architecture:
-    def __init__(self, input_shape, num_labels, model_type, num_epochs, preprocess = None):
+    def __init__(self, input_shape, num_labels, model_type, num_epochs):
         self.clean_surrogate = None
         self.input_shape = input_shape
         if len(self.input_shape) == 2:
@@ -15,7 +15,6 @@ class Architecture:
         self.num_labels = num_labels
         self.model_type = model_type #A function that takes input_shape and num_labels and returns a model.
         self.num_epochs = num_epochs
-        self.preprocess = preprocess #A function that takes a list of images and returns a list of images.
 
     def ResetSurrogate(self):
         self.clean_surrogate = None
@@ -28,17 +27,12 @@ class Architecture:
             model.set_weights(self.clean_surrogate.get_weights())
             return
             
-        if self.preprocess:
-            train_data = self.preprocess(train_data)
         model.fit(train_data, train_labels, epochs=self.num_epochs)
 
         if is_clean_surrogate:
             self.clean_surrogate = model
 
     def TrainWithValidation(self, model, train_data, train_labels, validation_data, validation_labels):
-        if self.preprocess:
-            train_data = self.preprocess(train_data)
-            validation_data = self.preprocess(validation_data)
         return model.fit(train_data, train_labels, epochs=self.num_epochs, validation_data=(validation_data, validation_labels))
 
     def CreateAndTrain(self, train_data, train_labels, is_clean_surrogate=False):
@@ -47,13 +41,9 @@ class Architecture:
         return model
     
     def Evaluate(self, model, test_data, test_labels):
-        if self.preprocess:
-            test_data = self.preprocess(test_data)
         return model.evaluate(test_data, test_labels, verbose=2)
     
     def Predict(self, model, images):
-        if self.preprocess:
-            images = self.preprocess(images)
         return model.predict(images)
     
     @staticmethod
@@ -63,14 +53,6 @@ class Architecture:
     @staticmethod
     def LeNet(input_shape, num_labels):
         return Architecture(input_shape, num_labels, LeNet, 40)
-
-    @staticmethod
-    def MobileNet(input_shape, num_labels):
-        if len(input_shape) < 3 or input_shape[2] != 3:
-            input_shape = input_shape[:2] + (3,)
-        if input_shape[0] < 32 or input_shape[1] < 32:
-            input_shape = (32, 32, 3)
-        return Architecture(input_shape, num_labels, MobileNet, 25, MobileNetPreprocess)
 
 def SimpleConvolutional(input_shape, num_labels):
     model = models.Sequential()
@@ -115,20 +97,6 @@ def LeNet(input_shape, num_labels):
     model.add(layers.Dense(num_labels, activation='softmax')) #output layer
 
     model.compile(optimizer='sgd', loss='categorical_crossentropy', metrics=['accuracy'])
-    return model
-
-
-def MobileNetPreprocess(images):
-    #MobileNet expects images in the range [-1, 1]
-    return images * 2.0 - 1.0
-
-
-def MobileNet(input_shape = (32, 32, 3), num_labels = 10):
-    model = tf.keras.applications.MobileNetV3Small(input_shape=input_shape, 
-                                                  classes=num_labels, 
-                                                  weights=None, 
-                                                  include_preprocessing=False)
-    model.compile('rmsprop', loss='categorical_crossentropy', metrics=['accuracy'])
     return model
 
 def FirstLayersOf(network, input_shape):

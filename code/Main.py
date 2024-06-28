@@ -70,21 +70,21 @@ def TestAttack(dataset, architecture, trigger, poisoning_method, poisoned_fracti
 #Searches a specific digit behind the comma. Returns the lowest digit that works.
 def SearchDigit(tested_poisoning_fractions, accuracies, success_rates, precision, addition=0, num_tries=3):
     #Options. Change these to fit your current experiment.
-    get_clean_dataset = Dataset.Mnist
+    get_clean_dataset = Dataset.Cifar10
     dataset = get_clean_dataset()
-    architecture = NeuralNetworks.Architecture.LeNet(dataset.ImgShape(), dataset.NumLabels())
+    architecture = NeuralNetworks.Architecture.SimpleConvolutional(dataset.ImgShape(), dataset.NumLabels())
     
-    #trigger = PatchTrigger()
+    trigger = PatchTrigger()
     #trigger = BlendTrigger("Blend_MNIST_Trigger.png", 0.10)
     #trigger = WarpTrigger(4, 0.5)
     #trigger = StaticPerturbation(2, 0.04)
-    trigger = DynamicPerturbation(3, 0.04)
+    #trigger = DynamicPerturbation(3, 0.04)
     #trigger = Narcissus(50, 1, 0.06)
 
-    #poisoning_method = RandomSampling()
+    poisoning_method = RandomSampling()
     #poisoning_method = ProxyFreeSelection(10)
     #poisoning_method = FilterAndUpdate(10, 0.5)
-    poisoning_method = GradientNorm()
+    #poisoning_method = GradientNorm()
 
     upper_bound = 10
     for digit in range(1, upper_bound):
@@ -185,9 +185,8 @@ def main():
     try:
         frac = Search(fractions, accs, rates)
         print(f"Poisoning fraction is {frac}")
-        print(f"Clean accuracy: {accs[-1]}")
 
-        PlotSearch("Adaptive Perturbation | Gradient Norm", fractions, accs, rates)
+        PlotSearch("Patch Trigger | Random Sampling", fractions, accs, rates)
 
     except:
         print("Error occurred. Printing results so you can continue where you left off.")
